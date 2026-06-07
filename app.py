@@ -8,6 +8,8 @@ import seaborn as sns
 import joblib
 import shap
 
+from src.features import add_features
+
 xgb_pipeline = joblib.load('heart_failure_xgb_pipeline.joblib')
 cph_model = joblib.load('heart_failure_cph_model.joblib')
 
@@ -41,10 +43,8 @@ def predict_and_explain(
         'smoking': int(smoking_val)
     }
     
-    patient_dict['creatinine_sodium_ratio'] = patient_dict['serum_creatinine'] / patient_dict['serum_sodium']
-    patient_dict['is_elderly'] = 1 if patient_dict['age'] >= 65 else 0
-    
     df_patient = pd.DataFrame([patient_dict])
+    df_patient = add_features(df_patient)
     
     prob = float(xgb_pipeline.predict_proba(df_patient)[0][1])
     pred = int(xgb_pipeline.predict(df_patient)[0])
